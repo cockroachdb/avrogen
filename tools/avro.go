@@ -25,110 +25,110 @@ func RandStringBytes(n int) string {
 
 const schemaStr = `{
   "type": "record",
-  "name": "benchmark",
+  "name": "tbl",
   "fields": [
     {
-      "name": "handle",
+      "name": "field01",
       "type": "string"
     },
     {
-      "name": "advertiseraccountid",
+      "name": "field02",
       "type": "int"
     },
     {
-      "name": "earnedstatus",
+      "name": "field03",
       "type": "int"
     },
     {
-      "name": "ecproduct",
+      "name": "field04",
       "type": "int"
     },
     {
-      "name": "displaylocation",
+      "name": "field05",
       "type": "int"
     },
     {
-      "name": "nativeengagement",
+      "name": "field06",
       "type": "int"
     },
     {
-      "name": "rainbird",
+      "name": "field07",
       "type": "int"
     },
     {
-      "name": "aggregatedengagementtype",
+      "name": "field08",
       "type": "int"
     },
     {
-      "name": "billingstatus",
+      "name": "field09",
       "type": "int"
     },
     {
-      "name": "chargeby",
+      "name": "field10",
       "type": "int"
     },
     {
-      "name": "bidtype",
+      "name": "field11",
       "type": "int"
     },
     {
-      "name": "cardtype",
+      "name": "field12",
       "type": "int"
     },
     {
-      "name": "creativetype",
+      "name": "field13",
       "type": "int"
     },
     {
-      "name": "countrycode",
+      "name": "field14",
       "type": "string"
     },
     {
-      "name": "trendtype",
+      "name": "field15",
       "type": "int"
     },
     {
-      "name": "timestamp",
+      "name": "field16",
       "type": "string"
     },
     {
-      "name": "isamplifiedsponsorship",
+      "name": "field17",
       "type": "boolean"
     },
     {
-      "name": "isamplifiedpreroll",
+      "name": "field18",
       "type": "boolean"
     },
     {
-      "name": "count_",
+      "name": "field19",
       "type": "int"
     },
     {
-      "name": "sum_localcost",
+      "name": "field20",
       "type": "int"
     },
     {
-      "name": "sum_usdcost",
+      "name": "field21",
       "type": "int"
     },
     {
-      "name": "zetasketchhll_campaignid",
+      "name": "field22",
       "type": "bytes"
     },
     {
-      "name": "_setvaluebitmap",
+      "name": "field23",
       "type": "int"
     },
     {
-      "name": "_batchid",
+      "name": "field24",
       "type": "int"
     },
     {
-      "name": "_batchtype",
+      "name": "field25",
       "type": "int"
     },
     {
-      "name": "_batchend",
+      "name": "field26",
       "type": "string"
     }
   ]
@@ -137,69 +137,69 @@ const schemaStr = `{
 const letters = "abcdefghijklmnopqrstuvwxyz"
 const letterCnt = len(letters)
 
-type BenchmarkRecord struct {
-	Handle                   string `avro:"handle"`
-	Advertiseraccountid      int    `avro:"advertiseraccountid"`
-	Earnedstatus             int    `avro:"earnedstatus"`
-	Ecproduct                int    `avro:"ecproduct"`
-	Displaylocation          int    `avro:"displaylocation"`
-	Nativeengagement         int    `avro:"nativeengagement"`
-	Rainbird                 int    `avro:"rainbird"`
-	Aggregatedengagementtype int    `avro:"aggregatedengagementtype"`
-	Billingstatus            int    `avro:"billingstatus"`
-	Chargeby                 int    `avro:"chargeby"`
-	Bidtype                  int    `avro:"bidtype"`
-	Cardtype                 int    `avro:"cardtype"`
-	Creativetype             int    `avro:"creativetype"`
-	Countrycode              string `avro:"countrycode"`
-	Trendtype                int    `avro:"trendtype"`
-	Timestamp                string `avro:"timestamp"`
-	Isamplifiedsponsorship   bool   `avro:"isamplifiedsponsorship"`
-	Isamplifiedpreroll       bool   `avro:"isamplifiedpreroll"`
-	Count                    int    `avro:"count_"`
-	SumLocalcost             int    `avro:"sum_localcost"`
-	SumUsdcost               int    `avro:"sum_usdcost"`
-	ZetasketchhllCampaignid  []byte `avro:"zetasketchhll_campaignid"`
-	Setvaluebitmap           int    `avro:"_setvaluebitmap"`
-	Batchid                  int    `avro:"_batchid"`
-	Batchtype                int    `avro:"_batchtype"`
-	Batchend                 string `avro:"_batchend"`
+type TblRecord struct {
+	Field01 string `avro:"field01"`
+	Field02 int    `avro:"field02"`
+	Field03 int    `avro:"field03"`
+	Field04 int    `avro:"field04"`
+	Field05 int    `avro:"field05"`
+	Field06 int    `avro:"field06"`
+	Field07 int    `avro:"field07"`
+	Field08 int    `avro:"field08"`
+	Field09 int    `avro:"field09"`
+	Field10 int    `avro:"field10"`
+	Field11 int    `avro:"field11"`
+	Field12 int    `avro:"field12"`
+	Field13 int    `avro:"field13"`
+	Field14 string `avro:"field14"`
+	Field15 int    `avro:"field15"`
+	Field16 string `avro:"field16"`
+	Field17 bool   `avro:"field17"`
+	Field18 bool   `avro:"field18"`
+	Field19 int    `avro:"field19"`
+	Field20 int    `avro:"field20"`
+	Field21 int    `avro:"field21"`
+	Field22 []byte `avro:"field22"`
+	Field23 int    `avro:"field23"`
+	Field24 int    `avro:"field24"`
+	Field25 int    `avro:"field25"`
+	Field26 string `avro:"field26"`
 }
 
-func GenerateRecord(sorted bool, fileCount int, maxFiles int, recordCount int, maxRecords int) BenchmarkRecord {
+func GenerateRecord(sorted bool, fileCount int, maxFiles int, recordCount int, maxRecords int) TblRecord {
 
-	handle := RandStringBytes(10)
+	field01 := RandStringBytes(10)
 	if sorted {
-		handle = GenerateOrderedHandle(fileCount, maxFiles) + GenerateOrderedHandle(recordCount, maxRecords)
+		field01 = GenerateOrderedField01(fileCount, maxFiles) + GenerateOrderedField01(recordCount, maxRecords)
 	}
 
-	return BenchmarkRecord{
-		Handle:                   handle,
-		Advertiseraccountid:      rand.Int(),
-		Earnedstatus:             rand.Int(),
-		Ecproduct:                rand.Int(),
-		Displaylocation:          rand.Int(),
-		Nativeengagement:         rand.Int(),
-		Rainbird:                 rand.Int(),
-		Aggregatedengagementtype: rand.Int(),
-		Billingstatus:            rand.Int(),
-		Chargeby:                 rand.Int(),
-		Bidtype:                  rand.Int(),
-		Cardtype:                 rand.Int(),
-		Creativetype:             rand.Int(),
-		Countrycode:              RandStringBytes(10),
-		Trendtype:                rand.Int(),
-		Timestamp:                time.Now().Format(time.RFC3339),
-		Isamplifiedsponsorship:   rand.Intn(2) == 1,
-		Isamplifiedpreroll:       rand.Intn(2) == 1,
-		Count:                    rand.Int(),
-		SumLocalcost:             rand.Int(),
-		SumUsdcost:               rand.Int(),
-		ZetasketchhllCampaignid:  []byte(RandStringBytes(10)),
-		Setvaluebitmap:           rand.Int(),
-		Batchid:                  rand.Int(),
-		Batchtype:                rand.Int(),
-		Batchend:                 time.Now().Format(time.RFC3339),
+	return TblRecord{
+		Field01: field01,
+		Field02: rand.Int(),
+		Field03: rand.Int(),
+		Field04: rand.Int(),
+		Field05: rand.Int(),
+		Field06: rand.Int(),
+		Field07: rand.Int(),
+		Field08: rand.Int(),
+		Field09: rand.Int(),
+		Field10: rand.Int(),
+		Field11: rand.Int(),
+		Field12: rand.Int(),
+		Field13: rand.Int(),
+		Field14: RandStringBytes(10),
+		Field15: rand.Int(),
+		Field16: time.Now().Format(time.RFC3339),
+		Field17: rand.Intn(2) == 1,
+		Field18: rand.Intn(2) == 1,
+		Field19: rand.Int(),
+		Field20: rand.Int(),
+		Field21: rand.Int(),
+		Field22: []byte(RandStringBytes(10)),
+		Field23: rand.Int(),
+		Field24: rand.Int(),
+		Field25: rand.Int(),
+		Field26: time.Now().Format(time.RFC3339),
 	}
 
 }
@@ -217,7 +217,7 @@ func ReadAvroFile(filepath string) {
 	}
 
 	for dec.HasNext() {
-		var record BenchmarkRecord
+		var record TblRecord
 		err = dec.Decode(&record)
 		if err != nil {
 			log.Fatal(err)
@@ -231,14 +231,14 @@ func ReadAvroFile(filepath string) {
 }
 
 func AvroFilePath(fileCounter int, localDirectory string) string {
-	return fmt.Sprintf("%s/benchmark-%05d.avro", localDirectory, fileCounter)
+	return fmt.Sprintf("%s/tbl-%05d.avro", localDirectory, fileCounter)
 }
 
 func CloudFilePath(fileCounter int) string {
-	return fmt.Sprintf("benchmark-%05d.avro", fileCounter)
+	return fmt.Sprintf("tbl-%05d.avro", fileCounter)
 }
 
-func GenerateOrderedHandle(cnt int, max int) string {
+func GenerateOrderedField01(cnt int, max int) string {
 
 	chars := 1
 

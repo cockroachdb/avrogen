@@ -1,0 +1,32 @@
+CREATE DATABASE avrogen;
+
+CREATE TABLE avrogen.public.benchmark (
+                                      field01 STRING NOT NULL,
+                                      field02 INT8 NOT NULL,
+                                      field03 INT8 NOT NULL,
+                                      field04 INT8 NOT NULL,
+                                      field05 INT8 NOT NULL,
+                                      field06 INT8 NOT NULL,
+                                      field07 INT8 NOT NULL,
+                                      field08 INT8 NOT NULL,
+                                      field09 INT8 NOT NULL,
+                                      field10 INT8 NOT NULL,
+                                      field11 INT8 NOT NULL,
+                                      field12 INT8 NOT NULL,
+                                      field13 INT8 NOT NULL,
+                                      field14 STRING NOT NULL,
+                                      field15 INT8 NOT NULL,
+                                      field16 TIMESTAMP NOT NULL,
+                                      field17 BOOL NOT NULL,
+                                      field18 BOOL NOT NULL,
+                                      field19 INT8 NULL,
+                                      field20 INT8 NULL,
+                                      field21 INT8 NULL,
+                                      field22 BYTES NULL,
+                                      field23 INT8 NOT NULL,
+                                      field24 INT8 NOT NULL,
+                                      field25 INT8 NOT NULL,
+                                      field26 TIMESTAMP NOT NULL,
+                                      CONSTRAINT "primary" PRIMARY KEY (field01 ASC, field16 ASC, field04 ASC, field05 ASC, field06 ASC, field08 ASC, field07 ASC, field14 ASC, field11 ASC, field12 ASC, field13 ASC, field15 ASC, field17 ASC, field18 ASC, field02 ASC, field03 ASC, field09 ASC, field10 ASC, field23 ASC, field24 ASC, field25 ASC, field26 ASC),
+                                      FAMILY "primary" (field01, field02, field03, field04, field05, field06, field07, field08, field09, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26)
+);
