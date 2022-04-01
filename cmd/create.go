@@ -14,28 +14,24 @@ import (
 const FilesFlag = "files"
 const SizeFlag = "size"
 const BucketFlag = "bucket"
-const BucketPrefixFlag = "bucket-prefix"
+const BucketPathFlag = "bucket-path"
 const SortedFlag = "sorted"
 const LocalDirFlag = "local-dir"
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Create Avro files",
+	Long: `Create Avro files and save locally and to GCS bucket.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		files := viper.GetInt(FilesFlag)
 		size := viper.GetInt(SizeFlag)
 		bucket := viper.GetString(BucketFlag)
-		bucketPrefix := viper.GetString(BucketPrefixFlag)
+		bucketPath := viper.GetString(BucketPathFlag)
 		sorted := viper.GetBool(SortedFlag)
 		localDir := viper.GetString(LocalDirFlag)
-		tools.GenerateAvroFiles(files, size, bucket, bucketPrefix, sorted, localDir)
+		tools.GenerateAvroFiles(files, size, bucket, bucketPath, sorted, localDir)
 	},
 }
 
@@ -50,9 +46,9 @@ func init() {
 	createCmd.PersistentFlags().Int(FilesFlag, 10, "Number of files to generate")
 	createCmd.PersistentFlags().Int(SizeFlag, 100, "File size in MiB")
 	createCmd.PersistentFlags().String(BucketFlag, "jon-twitter", "Cloud storage bucket name")
-	createCmd.PersistentFlags().String(BucketPrefixFlag, string(time.Now().Format(time.RFC3339)), "Bucket prefix")
-	createCmd.PersistentFlags().Bool(SortedFlag, false, "Generate data sorted by handle, across within and across files")
-	createCmd.PersistentFlags().String(LocalDirFlag, "avro-data", "Local directory")
+	createCmd.PersistentFlags().String(BucketPathFlag, string(time.Now().Format(time.RFC3339)), "Bucket path")
+	createCmd.PersistentFlags().Bool(SortedFlag, false, "Generate data sorted by handle, within and across files")
+	createCmd.PersistentFlags().String(LocalDirFlag, "avro-data", "Local directory to save files to")
 	viper.BindPFlags(createCmd.PersistentFlags())
 
 	// Cobra supports local flags which will only run when this command

@@ -10,7 +10,8 @@ avrogen create [path to schema] \
   --files [number of files] \
   --size [file size in MiB] \
   [--bucket GCSBUCKET]
-  [--path PATH]
+  [--bucket-path PATH]
+  [--local-path
   [--sorted]
 ```
 
