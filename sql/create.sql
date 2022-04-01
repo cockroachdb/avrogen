@@ -1,6 +1,6 @@
 CREATE DATABASE avrogen;
 
-CREATE TABLE avrogen.public.benchmark (
+CREATE TABLE avrogen.public.tbl (
                                       field01 STRING NOT NULL,
                                       field02 INT8 NOT NULL,
                                       field03 INT8 NOT NULL,
