@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -259,95 +260,75 @@ func GenerateOrderedField01(cnt int, max int) string {
 	return result
 }
 
-func WriteRecords(fileCount int, maxFiles int, filesizeMB int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
+func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
 
-	// TODO: we need an upper bound of records to be able to generated sorted data
-	// If we created files too large then this may be exceed, however, we will stop
-	// generating data and return if we hit this max
-	maxRecords := 1000000000
+	var encoders []*ocf.Encoder
 
 	// Open local file
-	filePath := AvroFilePath(fileCount, localDirectory)
-	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer func(f *os.File) {
-		err := f.Close()
+	if len(localDirectory) > 0 {
+		filePath := AvroFilePath(fileCount, localDirectory)
+		f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(f)
 
-	encLocal, err := ocf.NewEncoder(schemaStr, f)
-	if err != nil {
-		log.Fatal(err)
-	}
+		defer func(f *os.File) {
+			err := f.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(f)
 
-	// Open gcs file
-	cloudFilePath := CloudFilePath(fileCount)
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bkt := client.Bucket(storageBucket)
-	obj := bkt.Object(fmt.Sprintf("%s/%s", bucketPrefix, cloudFilePath))
-	w := obj.NewWriter(ctx)
-	defer func(w *storage.Writer) {
-		err := w.Close()
+		encLocal, err := ocf.NewEncoder(schemaStr, f)
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(w)
 
-	encCloud, err := ocf.NewEncoder(schemaStr, w)
-	if err != nil {
-		log.Fatal(err)
+		encoders = append(encoders, encLocal)
+	}
+
+	if len(storageBucket) > 0 {
+		// Open gcs file
+		cloudFilePath := CloudFilePath(fileCount)
+		ctx := context.Background()
+		client, err := storage.NewClient(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bkt := client.Bucket(storageBucket)
+		obj := bkt.Object(fmt.Sprintf("%s/%s", bucketPrefix, cloudFilePath))
+		w := obj.NewWriter(ctx)
+		defer func(w *storage.Writer) {
+			err := w.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(w)
+
+		encCloud, err := ocf.NewEncoder(schemaStr, w)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		encoders = append(encoders, encCloud)
+
 	}
 	recordCount := 0
 	// Run until we get to the file size
 	for {
 
 		recordCount++
-		record := GenerateRecord(sorted, fileCount, maxFiles, recordCount, maxRecords)
+		record := GenerateRecord(sorted, fileCount, maxFiles, recordCount, recordsPerFile)
 
-		// Write locally
-		err = encLocal.Encode(record)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// Write to cloud
-		err = encCloud.Encode(record)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if recordCount%1000 == 0 {
-
-			if err := encLocal.Flush(); err != nil {
-				log.Fatal(err)
-			}
-
-			if err := f.Sync(); err != nil {
-				log.Fatal(err)
-			}
-
-			// Get length of file in bytes
-			stat, err := f.Stat()
+		for _, encoder := range encoders {
+			err := encoder.Encode(record)
 			if err != nil {
 				log.Fatal(err)
 			}
+		}
 
-			bytes := stat.Size()
-			kb := bytes / 1024
-			mb := kb / 1024
-			if int(mb) >= filesizeMB || recordCount > maxRecords {
-				return
-			}
-
+		if recordCount >= recordsPerFile {
+			return
 		}
 
 	}
@@ -358,22 +339,28 @@ func WriteRecords(fileCount int, maxFiles int, filesizeMB int, storageBucket str
 // -- 4x number of nodes
 // For testing, 10 nodes, so maybe 40 files?
 // Let's keep the files the same size
-func GenerateAvroFiles(numFile int, fileSizeMb int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
+func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
 
-	//var wg sync.WaitGroup
+	var wg sync.WaitGroup
 	rand.Seed(time.Now().UnixNano())
 	fmt.Printf("Iterating from 1 to %v\n", numFile)
+
+	// Setup a wait group to wait until all files are written
+	wg.Add(numFile)
+
+	// Create a channel that limits the number of concurrent file creations
+	guard := make(chan struct{}, 5)
+
+	// Loop over files
 	for i := 1; i <= numFile; i++ {
-
-		//wg.Add(1)
-		//go func(cnt int,waitGroup sync.WaitGroup) {
-		//fmt.Println("Writing records")
-		WriteRecords(i, numFile, fileSizeMb, storageBucket, bucketPrefix, sorted, localDirectory)
-		//	wg.Done()
-		//}(i, wg)
-
+		guard <- struct{}{} // add struct to channel limiter
+		go func(n int) {
+			WriteRecords(n, numFile, recordsPerFile, storageBucket, bucketPrefix, sorted, localDirectory)
+			wg.Done()
+			<-guard
+		}(i)
 	}
 
-	//wg.Wait()
+	wg.Wait()
 
 }

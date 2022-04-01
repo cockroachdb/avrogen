@@ -44,11 +44,11 @@ func init() {
 	// and all subcommands, e.g.:
 	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
 	createCmd.PersistentFlags().Int(FilesFlag, 10, "Number of files to generate")
-	createCmd.PersistentFlags().Int(SizeFlag, 100, "File size in MiB")
-	createCmd.PersistentFlags().String(BucketFlag, "jon-twitter", "Cloud storage bucket name")
+	createCmd.PersistentFlags().Int(SizeFlag, 10000, "Number of records to generate per file")
+	createCmd.PersistentFlags().String(BucketFlag, "", "Cloud storage bucket name")
 	createCmd.PersistentFlags().String(BucketPathFlag, string(time.Now().Format(time.RFC3339)), "Bucket path")
 	createCmd.PersistentFlags().Bool(SortedFlag, false, "Generate data sorted by handle, within and across files")
-	createCmd.PersistentFlags().String(LocalDirFlag, "avro-data", "Local directory to save files to")
+	createCmd.PersistentFlags().String(LocalDirFlag, "", "Local directory to save files to")
 	viper.BindPFlags(createCmd.PersistentFlags())
 
 	// Cobra supports local flags which will only run when this command
