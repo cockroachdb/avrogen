@@ -339,7 +339,7 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 // -- 4x number of nodes
 // For testing, 10 nodes, so maybe 40 files?
 // Let's keep the files the same size
-func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
+func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, concurrency int) {
 
 	var wg sync.WaitGroup
 	rand.Seed(time.Now().UnixNano())
@@ -349,7 +349,7 @@ func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bu
 	wg.Add(numFile)
 
 	// Create a channel that limits the number of concurrent file creations
-	guard := make(chan struct{}, 5)
+	guard := make(chan struct{}, concurrency)
 
 	// Loop over files
 	for i := 1; i <= numFile; i++ {

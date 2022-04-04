@@ -17,6 +17,7 @@ const BucketFlag = "bucket"
 const BucketPathFlag = "bucket-path"
 const SortedFlag = "sorted"
 const LocalDirFlag = "local-dir"
+const ConcurrencyFlag = "concurrency"
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
@@ -31,7 +32,8 @@ var createCmd = &cobra.Command{
 		bucketPath := viper.GetString(BucketPathFlag)
 		sorted := viper.GetBool(SortedFlag)
 		localDir := viper.GetString(LocalDirFlag)
-		tools.GenerateAvroFiles(files, size, bucket, bucketPath, sorted, localDir)
+		concurency := viper.GetInt(ConcurrencyFlag)
+		tools.GenerateAvroFiles(files, size, bucket, bucketPath, sorted, localDir, concurency)
 	},
 }
 
@@ -49,6 +51,7 @@ func init() {
 	createCmd.PersistentFlags().String(BucketPathFlag, string(time.Now().Format(time.RFC3339)), "Bucket path")
 	createCmd.PersistentFlags().Bool(SortedFlag, false, "Generate data sorted by handle, within and across files")
 	createCmd.PersistentFlags().String(LocalDirFlag, "", "Local directory to save files to")
+	createCmd.PersistentFlags().Int(ConcurrencyFlag, 6, "Number of concurrent goroutines to generate files")
 	viper.BindPFlags(createCmd.PersistentFlags())
 
 	// Cobra supports local flags which will only run when this command

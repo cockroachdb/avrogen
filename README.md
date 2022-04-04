@@ -13,6 +13,7 @@ avrogen create \
   [--bucket-path PATH]
   [--local-path]
   [--sorted]
+  [--concurrency CONCURRENCY]
 ```
 
 Example:
@@ -32,6 +33,9 @@ Each row is approximately 181 bytes.
 10k = 1.7 MiB
 100k = 17 MiB
 1M = 173 MiB
+10M = 1.73 GiB
+100M = 17.3 GiB
+1B = 173 GiB
 etc
 ```
 

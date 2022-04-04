@@ -1,0 +1,1 @@
+import into avrogen.tbl avro data ('gs://jon-avro-import/sorted-64-100000000/*?AUTH=implicit') WITH DETACHED;
