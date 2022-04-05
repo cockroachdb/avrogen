@@ -16,6 +16,7 @@ const SizeFlag = "size"
 const BucketFlag = "bucket"
 const BucketPathFlag = "bucket-path"
 const SortedFlag = "sorted"
+const PartitionedFlag = "partitioned"
 const LocalDirFlag = "local-dir"
 const ConcurrencyFlag = "concurrency"
 
@@ -32,8 +33,9 @@ var createCmd = &cobra.Command{
 		bucketPath := viper.GetString(BucketPathFlag)
 		sorted := viper.GetBool(SortedFlag)
 		localDir := viper.GetString(LocalDirFlag)
-		concurency := viper.GetInt(ConcurrencyFlag)
-		tools.GenerateAvroFiles(files, size, bucket, bucketPath, sorted, localDir, concurency)
+		concurrency := viper.GetInt(ConcurrencyFlag)
+		partitioned := viper.GetBool(PartitionedFlag)
+		tools.GenerateAvroFiles(files, size, bucket, bucketPath, sorted, localDir, concurrency, partitioned)
 	},
 }
 
@@ -50,6 +52,7 @@ func init() {
 	createCmd.PersistentFlags().String(BucketFlag, "", "Cloud storage bucket name")
 	createCmd.PersistentFlags().String(BucketPathFlag, string(time.Now().Format(time.RFC3339)), "Bucket path")
 	createCmd.PersistentFlags().Bool(SortedFlag, false, "Generate data sorted by handle, within and across files")
+	createCmd.PersistentFlags().Bool(PartitionedFlag, false, "Partition files so there is no overlap of primary key across files, implied with --sorted flag")
 	createCmd.PersistentFlags().String(LocalDirFlag, "", "Local directory to save files to")
 	createCmd.PersistentFlags().Int(ConcurrencyFlag, 6, "Number of concurrent goroutines to generate files")
 	viper.BindPFlags(createCmd.PersistentFlags())

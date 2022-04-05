@@ -167,12 +167,30 @@ type TblRecord struct {
 	Field26 string `avro:"field26"`
 }
 
-func GenerateRecord(sorted bool, fileCount int, maxFiles int, recordCount int, maxRecords int) TblRecord {
+func GenerateFirstPrimaryKeyColumn(sorted bool, partitioned bool, fileCount int, maxFiles int, recordCount int, maxRecords int, length int) string {
 
-	field01 := RandStringBytes(10)
-	if sorted {
-		field01 = GenerateOrderedField01(fileCount, maxFiles) + GenerateOrderedField01(recordCount, maxRecords)
+	var field01 string
+
+	if sorted && partitioned { // Give field ordered prefix for each file and ordered string
+		field01 = GenerateOrderedString(fileCount, maxFiles) + GenerateOrderedString(recordCount, maxRecords)
+	} else if sorted { // Give field ordered string within each file
+		field01 = GenerateOrderedString(recordCount, maxRecords)
+	} else if partitioned { // Give field ordered prefix but random string following
+		prefix := GenerateOrderedString(fileCount, maxFiles)
+		field01 = prefix + RandStringBytes(length-len(prefix))
+	} else { // Give field random string
+		field01 = RandStringBytes(length)
 	}
+
+	if len(field01) < length {
+		field01 = field01 + RandStringBytes(length-len(field01))
+	}
+	return field01
+}
+
+func GenerateRecord(sorted bool, fileCount int, maxFiles int, recordCount int, maxRecords int, partitioned bool) TblRecord {
+
+	field01 := GenerateFirstPrimaryKeyColumn(sorted, partitioned, fileCount, maxFiles, recordCount, maxRecords, 15)
 
 	return TblRecord{
 		Field01: field01,
@@ -239,7 +257,7 @@ func CloudFilePath(fileCounter int) string {
 	return fmt.Sprintf("tbl-%05d.avro", fileCounter)
 }
 
-func GenerateOrderedField01(cnt int, max int) string {
+func GenerateOrderedString(cnt int, max int) string {
 
 	chars := 1
 
@@ -260,7 +278,7 @@ func GenerateOrderedField01(cnt int, max int) string {
 	return result
 }
 
-func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string) {
+func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, partitioned bool) {
 
 	var encoders []*ocf.Encoder
 
@@ -318,7 +336,7 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 	for {
 
 		recordCount++
-		record := GenerateRecord(sorted, fileCount, maxFiles, recordCount, recordsPerFile)
+		record := GenerateRecord(sorted, fileCount, maxFiles, recordCount, recordsPerFile, partitioned)
 
 		for _, encoder := range encoders {
 			err := encoder.Encode(record)
@@ -339,7 +357,7 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 // -- 4x number of nodes
 // For testing, 10 nodes, so maybe 40 files?
 // Let's keep the files the same size
-func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, concurrency int) {
+func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, concurrency int, partitioned bool) {
 
 	var wg sync.WaitGroup
 	rand.Seed(time.Now().UnixNano())
@@ -355,7 +373,7 @@ func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bu
 	for i := 1; i <= numFile; i++ {
 		guard <- struct{}{} // add struct to channel limiter
 		go func(n int) {
-			WriteRecords(n, numFile, recordsPerFile, storageBucket, bucketPrefix, sorted, localDirectory)
+			WriteRecords(n, numFile, recordsPerFile, storageBucket, bucketPrefix, sorted, localDirectory, partitioned)
 			wg.Done()
 			<-guard
 		}(i)

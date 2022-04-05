@@ -13,8 +13,15 @@ avrogen create \
   [--bucket-path PATH]
   [--local-path]
   [--sorted]
+  [--partitioned]
   [--concurrency CONCURRENCY]
 ```
+
+Note:
+
+`sorted` ensures that rows are sorted within a single file
+
+`partitioned` ensures that files do not have overlapping data (data is sorted across files)
 
 Example:
 
