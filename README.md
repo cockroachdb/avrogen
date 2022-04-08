@@ -36,7 +36,7 @@ To save to local directory, use the `--local-path` flag.
 To save to a GCS bucket, use the `--bucket` and `--bucket-path` flags.
 ## Test data
 
-Avrogen comes with a test schema that is derived from a customer workload.
+Avrogen comes with a hard-coded test schema, but there are plans to make it easy to add custom schemas.
 
 Each row is approximately 181 bytes (varies a bit)
 
