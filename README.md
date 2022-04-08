@@ -27,6 +27,10 @@ Example:
 
 `avrogen generate /path/to/schema --files 100 --size 10000 --sorted --local-path /tmp`
 
+or if you haven't built it and might be hacking on it:
+
+`go run main.go generate /path/to/schema --files 100 --size 10000 --sorted --local-path /tmp`
+
 To save to local directory, use the `--local-path` flag.
 
 To save to a GCS bucket, use the `--bucket` and `--bucket-path` flags.
@@ -34,7 +38,7 @@ To save to a GCS bucket, use the `--bucket` and `--bucket-path` flags.
 
 Avrogen comes with a test schema that is derived from a customer workload.
 
-Each row is approximately 181 bytes.
+Each row is approximately 181 bytes (varies a bit)
 
 ```
 10k = 1.7 MiB
@@ -50,4 +54,14 @@ etc
 
 ```
 GOOS=linux GOARCH=amd64 go build -o bin/avrogen
+```
+
+## More Examples
+
+```
+./avrogen create --bucket jon-avro-import --bucket-path sorted-64-100000000 --files 64 --size 100000000 --sorted > gen.log 2>&1 &
+```
+
+```
+./avrogen create --bucket jon-avro-import --bucket-path partitioned-64-100000000 --files 64 --size 100000000 --partitioned > gen.log 2>&1 &
 ```

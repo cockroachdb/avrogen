@@ -278,6 +278,23 @@ func GenerateOrderedString(cnt int, max int) string {
 	return result
 }
 
+var (
+	cloudStorageClientOnce sync.Once
+	cloudStorageClient     *storage.Client
+)
+
+// It is recommended to only use a single cloud storage client across goroutines
+func getCloudStorageClient(ctx context.Context) *storage.Client {
+	var err error
+	cloudStorageClientOnce.Do(func() {
+		cloudStorageClient, err = storage.NewClient(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+	})
+	return cloudStorageClient
+}
+
 func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, partitioned bool) {
 
 	var encoders []*ocf.Encoder
@@ -309,10 +326,7 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 		// Open gcs file
 		cloudFilePath := CloudFilePath(fileCount)
 		ctx := context.Background()
-		client, err := storage.NewClient(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
+		client := getCloudStorageClient(ctx)
 		bkt := client.Bucket(storageBucket)
 		obj := bkt.Object(fmt.Sprintf("%s/%s", bucketPrefix, cloudFilePath))
 		w := obj.NewWriter(ctx)
@@ -333,15 +347,25 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 	}
 	recordCount := 0
 	// Run until we get to the file size
+	start := time.Now().Unix()
 	for {
 
 		recordCount++
+
 		record := GenerateRecord(sorted, fileCount, maxFiles, recordCount, recordsPerFile, partitioned)
 
 		for _, encoder := range encoders {
 			err := encoder.Encode(record)
 			if err != nil {
 				log.Fatal(err)
+			}
+		}
+
+		// Print rate
+		if recordCount%100000 == 0 || recordCount >= recordsPerFile {
+			elapsed := time.Now().Unix() - start
+			if elapsed > 0 {
+				log.Printf("File %d: %d rows/sec\n", fileCount, int64(recordCount)/elapsed)
 			}
 		}
 
@@ -352,11 +376,6 @@ func WriteRecords(fileCount int, maxFiles int, recordsPerFile int, storageBucket
 	}
 }
 
-// Our test input is a file set consisting of 235 avro files, 24 GB in total.
-// -- 100MiB each
-// -- 4x number of nodes
-// For testing, 10 nodes, so maybe 40 files?
-// Let's keep the files the same size
 func GenerateAvroFiles(numFile int, recordsPerFile int, storageBucket string, bucketPrefix string, sorted bool, localDirectory string, concurrency int, partitioned bool) {
 
 	var wg sync.WaitGroup
